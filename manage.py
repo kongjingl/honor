@@ -1,4 +1,5 @@
 # -*- encoding=utf-8 -*-
+import unittest
 
 from honor import app,db
 import random
@@ -10,6 +11,12 @@ manager =Manager(app)
 def get_image_url():
     return 'http://images.nowcoder.com/head/' + str(random.randint(0, 1000)) + 'm.png'
 
+@manager.command
+def run_test():
+    tests = unittest.TestLoader().discover("./")
+    unittest.TextTestRunner().run(tests)
+
+
 
 @manager.command
 def init_database():
@@ -17,7 +24,7 @@ def init_database():
     db.create_all()
     for i in range(0,30):
         db.session.add(User('User'+ str(i),'a'+str(i)))
-        for j in range(0,3):
+        for j in range(0,11):
             db.session.add(Image(get_image_url(),i+1))
             for k in range(0,3):
                 db.session.add(Comment('this is a comment'+str(k), 1+3*i+j,i+1))
@@ -42,7 +49,7 @@ def init_database():
     print 3, User.query.order_by(User.id.desc()).offset(1).limit(2).all()
     print 4, User.query.filter(User.username.endswith('1')).limit(3).all()
     print 5, User.query.filter(or_(User.id==2,User.id==4)).all()
-    print 6, User.query.filter(and_(User.id > 1, User.id < 4)).all()
+    print 6, User.query.filter(and_(User.id > 1, User.id < 4)).first()
     print 7, User.query.order_by(User.id.desc()).paginate(page=1,per_page=5).items
     user = User.query.get(1)
     print 8,user.images
@@ -50,6 +57,7 @@ def init_database():
     print 9,image,image.user
     user = User.query.get(10)
     print 10, user
+
 
 
 
